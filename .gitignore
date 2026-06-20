@@ -1,0 +1,96 @@
+# ===================================
+# OS-generated files
+# ===================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+__MACOSX/
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ===================================
+# Editor / IDE files
+# ===================================
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# JetBrains (WebStorm, IntelliJ, etc.)
+.idea/
+*.iml
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim/Emacs swap files
+*.swp
+*.swo
+*~
+
+# Notepad++ backup
+*.bak
+
+# ===================================
+# Node.js / npm / build tools
+# ===================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+.cache/
+.parcel-cache/
+
+# ===================================
+# Environment & secrets
+# ===================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ===================================
+# Logs & temp files
+# ===================================
+*.log
+logs/
+*.tmp
+*.temp
+tmp/
+temp/
+
+# ===================================
+# Archive / compressed files (avoid accidental uploads)
+# ===================================
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ===================================
+# Backup files
+# ===================================
+*.orig
+*.backup
+*-backup.*
+*_backup.*
+prompt*.txt
+promtp.txt

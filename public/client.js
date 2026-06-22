@@ -45,7 +45,10 @@ function clearBoard() {
 function renderBoard(board) {
   board.forEach((symbol, i) => {
     if (symbol) {
-      cells[i].innerHTML = `<span>${symbol}</span>`;
+      const span = document.createElement('span');
+      span.textContent = symbol;
+      cells[i].innerHTML = '';
+      cells[i].appendChild(span);
       cells[i].classList.add(symbol);
       cells[i].disabled = true;
     }
@@ -116,7 +119,10 @@ socket.on('game-start', ({ symbol, roomId, board, turn }) => {
 
 socket.on('move-made', ({ board, turn, move }) => {
   const cell = cells[move.cellIndex];
-  cell.innerHTML = `<span>${move.symbol}</span>`;
+  const span = document.createElement('span');
+  span.textContent = move.symbol;
+  cell.innerHTML = '';
+  cell.appendChild(span);
   cell.classList.add(move.symbol);
   cell.disabled = true;
   setTurnState(turn);

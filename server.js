@@ -5,18 +5,37 @@ const { addToQueue, handleDisconnect, activeGames, socketRooms } = require('./ma
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, { 
+  cors: {
+    origin: process.env.NODE_ENV === 'production'
+      ? 'https://your-actual-domain.com'
+      : '*',
+    methods: ['GET', 'POST'],
+  },
+});
 
 app.use(express.static('public'));
 
 io.on('connection', (socket) => {
   console.log('Player connected:', socket.id);
 
+  let lastMoveTime = 0;
+  const MOVE_COOLDOWN_MS = 300;
+
   socket.on('find-game', () => {
     addToQueue(socket);
   });
 
   socket.on('make-move', (cellIndex) => {
+    if (!Number.isInteger(cellIndex) || cellIndex < 0 || cellIndex > 8) {
+      socket.emit('error', { message: 'Invalid move.' });
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastMoveTime < MOVE_COOLDOWN_MS) return; // rate limit
+    lastMoveTime = now;
+
     const roomId = socketRooms.get(socket.id);
     if (!roomId) return; // player isn't in an active game
 

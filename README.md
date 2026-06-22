@@ -38,3 +38,14 @@ Built collaboratively with [Claude Code](https://claude.ai/code). The game engin
 
 - Stale game-state bug — `makeMove()` accepted moves after a game had already ended (winner or draw). Fixed by tracking terminal state on the game instance and rejecting moves once it's set.
 - Re-matchmaking race condition — after a game ended normally, the room was never removed from the active-games map, so `addToQueue`'s duplicate check blocked players from starting a new game after clicking Play Again. Fixed by cleaning up the room immediately after emitting `game-over`.
+
+# Security Review
+
+After the initial build, a custom Claude Code subagent (`security-reviewer`, configured in `.claude/agents/`) was used to audit the codebase for security issues before deployment. It flagged five findings; the four actionable ones were fixed:
+
+- **No input validation on `cellIndex`** — the server passed socket input directly into game logic without confirming it was a valid integer. Fixed by adding an explicit type and bounds check before processing any move.
+- **No rate limiting on socket events** — a malicious client could flood the server with move events. Fixed with a per-connection cooldown timer.
+- **Open CORS policy** — Socket.io defaulted to accepting connections from any origin. Restructured to lock to a specific domain in production.
+- **Unsafe DOM updates** — the client used `innerHTML` with server-provided data to render board cells. Replaced with `textContent` to eliminate any XSS risk if that data path ever changes.
+
+This mirrors a common pre-launch practice: pairing automated security review with manual verification before pushing changes live.

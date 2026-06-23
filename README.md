@@ -49,3 +49,12 @@ After the initial build, a custom Claude Code subagent (`security-reviewer`, con
 - **Unsafe DOM updates** — the client used `innerHTML` with server-provided data to render board cells. Replaced with `textContent` to eliminate any XSS risk if that data path ever changes.
 
 This mirrors a common pre-launch practice: pairing automated security review with manual verification before pushing changes live.
+
+# Socket Room Cleanup Fix
+
+Sockets were never explicitly removed from their Socket.IO room after a game ended or after a player disconnected, so stale room memberships accumulated on the server across multiple games.
+
+- Added `socket.leave(roomId)` calls after game-over so both sockets exit the room once a result is emitted (`server.js`).
+- Added matching `socket.leave(roomId)` calls in the disconnect handler so both the disconnecting socket and the surviving opponent are removed from the room (`matchmaking.js`).
+- Verified with a two-client test script that confirmed each socket could pair into a fresh room after game-over and after an opponent disconnect.
+- A security-reviewer subagent reviewed the fix and found no issues; the cleanup ordering (map deletions before leave calls) is safe because it is synchronous with no interleaving window.

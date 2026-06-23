@@ -60,6 +60,8 @@ io.on('connection', (socket) => {
       activeGames.delete(roomId);
       socketRooms.delete(players.X.id);
       socketRooms.delete(players.O.id);
+      players.X.leave(roomId);
+      players.O.leave(roomId);
     }
   });
 

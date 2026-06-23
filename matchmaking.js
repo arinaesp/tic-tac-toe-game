@@ -69,6 +69,8 @@ function handleDisconnect(socket) {
     activeGames.delete(roomId);
     socketRooms.delete(players.X.id);
     socketRooms.delete(players.O.id);
+    socket.leave(roomId);
+    opponent.leave(roomId);
   }
 }
 

@@ -37,7 +37,9 @@ io.on('connection', (socket) => {
     const roomId = socketRooms.get(socket.id);
     if (!roomId) return; // player isn't in an active game
 
-    const { game, players } = activeGames.get(roomId);
+    const gameState = activeGames.get(roomId);
+    if (!gameState) return; // game already cleaned up
+    const { game, players } = gameState;
 
     const symbol = players.X.id === socket.id ? 'X' : 'O';
     const result = game.makeMove(cellIndex, symbol);

@@ -5,11 +5,9 @@ const { addToQueue, handleDisconnect, activeGames, socketRooms } = require('./ma
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { 
+const io = new Server(server, {
   cors: {
-    origin: process.env.NODE_ENV === 'production'
-      ? 'https://your-actual-domain.com'
-      : '*',
+    origin: process.env.CORS_ORIGIN || false,
     methods: ['GET', 'POST'],
   },
 });

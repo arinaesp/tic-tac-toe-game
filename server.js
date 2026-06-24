@@ -12,7 +12,19 @@ const io = new Server(server, {
   },
 });
 
-const CONNECTIONS_PER_IP = parseInt(process.env.CONNECTIONS_PER_IP, 10) || 10;
+let CONNECTIONS_PER_IP;
+{
+  const raw = process.env.CONNECTIONS_PER_IP;
+  if (raw === undefined || raw === '') {
+    CONNECTIONS_PER_IP = 10;
+  } else {
+    const parsed = parseInt(raw, 10);
+    if (!(/^\d+$/.test(raw.trim())) || parsed <= 0) {
+      throw new Error(`CONNECTIONS_PER_IP must be a positive integer, got: "${raw}"`);
+    }
+    CONNECTIONS_PER_IP = parsed;
+  }
+}
 const TRUST_PROXY = process.env.TRUST_PROXY === 'true';
 const ipConnectionCounts = new Map();
 
@@ -32,6 +44,14 @@ io.use((socket, next) => {
   }
   ipConnectionCounts.set(ip, count + 1);
   socket._resolvedIp = ip;
+  socket.once('disconnect', () => {
+    const current = ipConnectionCounts.get(ip);
+    if (current <= 1) {
+      ipConnectionCounts.delete(ip);
+    } else {
+      ipConnectionCounts.set(ip, current - 1);
+    }
+  });
   next();
 });
 
@@ -94,15 +114,6 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('Player disconnected:', socket.id);
     handleDisconnect(socket);
-    const ip = socket._resolvedIp;
-    if (ip) {
-      const count = ipConnectionCounts.get(ip);
-      if (count <= 1) {
-        ipConnectionCounts.delete(ip);
-      } else {
-        ipConnectionCounts.set(ip, count - 1);
-      }
-    }
   });
 });
 

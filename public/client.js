@@ -10,7 +10,7 @@ let mySymbol  = null;
 let myRoomId  = null;
 let myTurn    = false;
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────────────────────────────
 
 function setStatus(text) {
   statusEl.textContent = text;
@@ -71,7 +71,7 @@ function showPlayAgain() {
   playAgainBtn.style.display = '';
 }
 
-// ── UI Events ─────────────────────────────────────────────────────────────────
+// ── UI Events ─────────────────────────────────────────────────────────────────────────────
 
 findGameBtn.addEventListener('click', () => {
   findGameBtn.disabled = true;
@@ -98,7 +98,7 @@ cells.forEach(cell => {
   });
 });
 
-// ── Socket Events ─────────────────────────────────────────────────────────────
+// ── Socket Events ─────────────────────────────────────────────────────────────────────────────
 
 socket.on('waiting', () => {
   hideSpinner();
@@ -158,4 +158,13 @@ socket.on('opponent-left', () => {
 
 socket.on('error', ({ message }) => {
   console.warn('Server error:', message);
+});
+
+socket.on('move-rejected', ({ reason }) => {
+  if (reason === 'too-fast') {
+    setStatus('Too fast — wait a moment and try again.');
+    setTimeout(() => {
+      setStatus(myTurn ? 'Your turn' : "Opponent's turn");
+    }, 1000);
+  }
 });

@@ -31,7 +31,10 @@ io.on('connection', (socket) => {
     }
 
     const now = Date.now();
-    if (now - lastMoveTime < MOVE_COOLDOWN_MS) return; // rate limit
+    if (now - lastMoveTime < MOVE_COOLDOWN_MS) {
+      socket.emit('move-rejected', { reason: 'too-fast' });
+      return;
+    }
     lastMoveTime = now;
 
     const roomId = socketRooms.get(socket.id);

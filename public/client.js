@@ -168,3 +168,13 @@ socket.on('move-rejected', ({ reason }) => {
     }, 1000);
   }
 });
+
+socket.on('connect_error', (err) => {
+  hideSpinner();
+  findGameBtn.disabled = false;
+  if (err.message === 'connection_limit_exceeded') {
+    setStatus('Too many connections from this device. Close other tabs and try again.');
+  } else {
+    setStatus('Could not connect to the server. Please try again.');
+  }
+});

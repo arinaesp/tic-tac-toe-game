@@ -12,6 +12,29 @@ const io = new Server(server, {
   },
 });
 
+const CONNECTIONS_PER_IP = parseInt(process.env.CONNECTIONS_PER_IP, 10) || 10;
+const TRUST_PROXY = process.env.TRUST_PROXY === 'true';
+const ipConnectionCounts = new Map();
+
+function resolveIp(socket) {
+  let ip = TRUST_PROXY
+    ? (socket.handshake.headers['x-forwarded-for'] || '').split(',')[0].trim()
+    : '';
+  if (!ip) ip = socket.handshake.address;
+  return ip.replace(/^::ffff:/, '');
+}
+
+io.use((socket, next) => {
+  const ip = resolveIp(socket);
+  const count = ipConnectionCounts.get(ip) || 0;
+  if (count >= CONNECTIONS_PER_IP) {
+    return next(new Error('connection_limit_exceeded'));
+  }
+  ipConnectionCounts.set(ip, count + 1);
+  socket._resolvedIp = ip;
+  next();
+});
+
 app.use(express.static('public'));
 
 io.on('connection', (socket) => {
@@ -71,6 +94,15 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('Player disconnected:', socket.id);
     handleDisconnect(socket);
+    const ip = socket._resolvedIp;
+    if (ip) {
+      const count = ipConnectionCounts.get(ip);
+      if (count <= 1) {
+        ipConnectionCounts.delete(ip);
+      } else {
+        ipConnectionCounts.set(ip, count - 1);
+      }
+    }
   });
 });
 

@@ -1,5 +1,19 @@
 const TicTacToeGame = require('./game');
 
+let MAX_QUEUE_SIZE;
+{
+  const raw = process.env.MAX_QUEUE_SIZE;
+  if (raw === undefined || raw === '') {
+    MAX_QUEUE_SIZE = 100;
+  } else {
+    const parsed = parseInt(raw, 10);
+    if (!(/^\d+$/.test(raw.trim())) || parsed <= 0) {
+      throw new Error(`MAX_QUEUE_SIZE must be a positive integer, got: "${raw}"`);
+    }
+    MAX_QUEUE_SIZE = parsed;
+  }
+}
+
 const queue = [];
 const activeGames = new Map(); // roomId -> { game, players: { X: socket, O: socket } }
 const socketRooms = new Map(); // socketId -> roomId
@@ -9,6 +23,11 @@ let roomCounter = 0;
 function addToQueue(socket) {
   // Prevent duplicate queue entries and re-queuing while already in a game
   if (queue.includes(socket) || socketRooms.has(socket.id)) return;
+
+  if (queue.length >= MAX_QUEUE_SIZE) {
+    socket.emit('queue-full', { reason: 'queue-full' });
+    return;
+  }
 
   if (queue.length > 0) {
     // Pair the waiting player with the new arrival

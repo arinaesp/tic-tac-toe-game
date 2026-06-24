@@ -178,3 +178,9 @@ socket.on('connect_error', (err) => {
     setStatus('Could not connect to the server. Please try again.');
   }
 });
+
+socket.on('queue-full', () => {
+  hideSpinner();
+  findGameBtn.disabled = false;
+  setStatus('Server is full — please try again in a moment.');
+});
